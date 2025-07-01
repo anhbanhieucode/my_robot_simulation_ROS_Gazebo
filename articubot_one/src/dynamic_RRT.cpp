@@ -5,6 +5,7 @@
 #include "tf2_ros/transform_listener.h"
 #include "tf2_ros/buffer.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "sensor_msgs/msg/laser_scan.hpp"
 
 #include <vector>
 #include <cmath>
@@ -13,16 +14,18 @@
 
 using std::placeholders::_1;
 
-class RRTNavigator : public rclcpp::Node
+class DRRTNavigator : public rclcpp::Node
 {
 public:
-    RRTNavigator() : rclcpp::Node("rrt_navigator"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
+    DRRTNavigator() : rclcpp::Node("drrt_navigator"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_)
     {
         map_sub_ = this->create_subscription<nav_msgs::msg::OccupancyGrid>(
-            "/map", 10, std::bind(&RRTNavigator::map_callback, this, _1));
+            "/map", 10, std::bind(&DRRTNavigator::map_callback, this, _1));
         goal_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
-            "/goal_pose", 10, std::bind(&RRTNavigator::goal_callback, this, _1));
+            "/goal_pose", 10, std::bind(&DRRTNavigator::goal_callback, this, _1));
         path_pub_ = this->create_publisher<nav_msgs::msg::Path>("/planned_rrt_path", 10);
+        scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
+            "/scan", 10, std::bind(&DRRTNavigator::scan_callback,this,_1));
     }
 
 private:
@@ -32,9 +35,13 @@ private:
     double resolution_;
     geometry_msgs::msg::Pose origin_;
 
+    std::vector<std::pair<double,double>> rrt_path_world_;
+    std::vector<std::pair<double,double>> lidar_obstacles_;
+
     rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr map_sub_;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr goal_sub_;
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_pub_;
+    rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
 
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener tf_listener_;
@@ -48,6 +55,48 @@ private:
         resolution_ = msg->info.resolution;
         origin_ = msg->info.origin;
         RCLCPP_INFO(this->get_logger(), "Map received");
+    }
+
+    void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
+    {
+        geometry_msgs::msg::TransformStamped transformStamped;
+        try
+        {
+            transformStamped = tf_buffer_.lookupTransform("map", msg->header.frame_id, tf2::TimePointZero);
+        }
+        catch(tf2::TransformException &ex)
+        {
+            RCLCPP_WARN(this->get_logger(), "Could not transform scan: %s", ex.what());
+            return;
+        }
+        
+        double angle = msg->angle_min;
+
+        for( size_t i = 0; i < msg->ranges.size(); ++i)
+        {
+            float r = msg->ranges[i];
+            if(std::isnan(r) || std::isinf(r) || r > msg->range_max)
+            {
+                angle += msg->angle_increment;
+                continue;
+            }
+
+            geometry_msgs::msg::PointStamped pt_lidar;
+            pt_lidar.header = msg->header;
+            pt_lidar.point.x = r*std::cos(angle);
+            pt_lidar.point.y = r*std::sin(angle);
+            pt_lidar.point.z = 0.0;
+
+            geometry_msgs::msg::PointStamped pt_map;
+            
+            tf2::doTransform(pt_lidar, pt_map, transformStamped);
+
+            lidar_obstacles_.emplace_back(pt_map.point.x, pt_map.point.y);
+
+            RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 10,"Lidar obstacle at [%.2f,%.2f]", pt_map.point.x, pt_map.point.y);
+
+            angle += msg->angle_increment;
+        }
     }
 
     std::pair<int, int> world_to_grid(double x, double y)
@@ -177,6 +226,11 @@ private:
 
                 for (auto& [x, y] : path)
                 {
+                    double wx = x * resolution_ + origin_.position.x;
+                    double wy = y * resolution_ + origin_.position.y;
+                    
+                    rrt_path_world_.emplace_back(wx,wy);
+
                     geometry_msgs::msg::PoseStamped p;
                     p.header = path_msg.header;
                     p.pose.position.x = x * resolution_ + origin_.position.x;
@@ -196,12 +250,14 @@ private:
             RCLCPP_WARN(this->get_logger(), "TF error: %s", ex.what());
         }
     }
+
+
 };
 
 int main(int argc, char** argv)
 {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<RRTNavigator>());
+    rclcpp::spin(std::make_shared<DRRTNavigator>());
     rclcpp::shutdown();
     return 0;
 }

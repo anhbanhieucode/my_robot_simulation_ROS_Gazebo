@@ -23,6 +23,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 # Add your C++ source
 add_executable(a_star_navigator src/A_star.cpp)
@@ -38,8 +39,7 @@ ament_target_dependencies(a_star_navigator
 
 add_executable(rrt_navigator src/RRT.cpp)
 
-ament_target_dependencies(
-  rrt_navigator  
+ament_target_dependencies(rrt_navigator  
   rclcpp
   nav_msgs
   geometry_msgs
@@ -48,10 +48,23 @@ ament_target_dependencies(
   tf2_geometry_msgs
 )
 
+add_executable(drrt_navigator src/dynamic_RRT.cpp)
+
+ament_target_dependencies(drrt_navigator  
+  rclcpp
+  nav_msgs
+  geometry_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  sensor_msgs
+)
+
 # Install the executable
 install(TARGETS
   a_star_navigator
   rrt_navigator
+  drrt_navigator
   DESTINATION lib/${PROJECT_NAME}
 )
 
