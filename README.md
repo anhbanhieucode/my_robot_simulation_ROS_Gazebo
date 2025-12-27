@@ -74,7 +74,7 @@ articubot_one/
 ```
 ## Prerequisites
 Ensure you have the following installed:
-* **ROS 2** (Humble Hawksbill or Iron Irwini recommended)
+* **ROS 2** (Foxy on Ubunto 20.04)
 * **Gazebo** (Classic or Ignition)
 * **Nav2** (Navigation 2 Stack)
 * **Xacro** (`sudo apt install ros-<distro>-xacro`)
