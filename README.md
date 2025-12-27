@@ -71,3 +71,72 @@ articubot_one/
 ├── CMakeLists.txt
 ├── package.xml
 └── README.md
+```
+## Prerequisites
+Ensure you have the following installed:
+* **ROS 2** (Humble Hawksbill or Iron Irwini recommended)
+* **Gazebo** (Classic or Ignition)
+* **Nav2** (Navigation 2 Stack)
+* **Xacro** (`sudo apt install ros-<distro>-xacro`)
+
+## Installation & Build
+
+1.  **Create a Colcon Workspace:**
+    ```bash
+    mkdir -p ~/ros2_ws/src
+    cd ~/ros2_ws/src
+    ```
+
+2.  **Clone the Repository:**
+    ```bash
+    git clone [https://github.com/anhbanhieucode/my_robot_simulation_ROS_Gazebo.git](https://github.com/anhbanhieucode/my_robot_simulation_ROS_Gazebo.git)
+    ```
+
+3.  **Build the Package:**
+    ```bash
+    cd ~/ros2_ws
+    colcon build --symlink-install
+    ```
+
+4.  **Source the Overlay:**
+    ```bash
+    source install/setup.bash
+    ```
+
+## Usage
+
+### 1. Launch Simulation
+To spawn the robot in Gazebo with the default configuration:
+```bash
+ros2 launch articubot_one launch_sim.launch.py world:=./src/articubot_one/worlds/ob_world.world
+```
+
+2. Run Path Planning Scripts
+The path planning algorithms in the src folder are standalone implementations designed to be studied or integrated into nodes. To run the Python version of A*:
+
+```bash
+python3 src/articubot_one/src/A_star_python.py
+```
+(Note: Ensure you have the necessary libraries installed via pip if running standalone)
+
+## Path Planning Algorithms
+
+This repository explores the following algorithms located in the `src/` directory:
+
+* **(A-Star):**
+    * `A_star_python.py`: Python implementation for quick prototyping and logic validation.
+    * `A_star.cpp`: C++ implementation for performance comparison.
+
+* **RRT (Rapidly-exploring Random Tree):**
+    * `RRT.cpp`: Standard RRT implementation for high-dimensional search spaces.
+    * `dynamic_RRT.cpp`: An experimental variation for dynamic environments (under developing) .
+
+---
+
+## License
+
+This project is open-source and available under the **MIT License**.
+
+---
+**Author:** [anhbanhieucode]
+
