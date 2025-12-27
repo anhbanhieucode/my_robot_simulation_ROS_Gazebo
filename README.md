@@ -36,11 +36,11 @@ This project implements a complete simulation pipeline for a mobile robot. It in
 
 ## Key Features
 
-* ** Robot Modeling:** Full URDF/Xacro description of a differential drive robot including inertial macros and collision geometry.
-* ** Sensor Simulation:** Integrated Lidar sensor simulation (`lidar.xacro`).
-* ** Gazebo Worlds:** Custom environments (`ob_world.world`) for testing obstacle avoidance.
-* ** Path Planning:** Standalone implementations of A* and RRT algorithms in `src/`.
-* ** One-Command Launch:** Streamlined `launch` files to start simulation, localization, and navigation stacks.
+* **Robot Modeling:** Full URDF/Xacro description of a differential drive robot including inertial macros and collision geometry.
+* **Sensor Simulation:** Integrated Lidar sensor simulation (`lidar.xacro`).
+* **Gazebo Worlds:** Custom environments (`ob_world.world`) for testing obstacle avoidance.
+* **Path Planning:** Standalone implementations of A* and RRT algorithms in `src/`.
+* **One-Command Launch:** Streamlined `launch` files to start simulation, localization, and navigation stacks.
 
 ---
 
