@@ -5,7 +5,7 @@
 ![Language](https://img.shields.io/badge/Language-C%2B%2B%20%7C%20Python-blue)
 ![Status](https://img.shields.io/badge/Status-Educational-green)
 
-**A ROS 2 package for simulating a differential drive mobile robot ("Articubot One") in Gazebo, featuring classic path planning implementations.**
+**A ROS 2 package for simulating a differential drive mobile robot, inherited from repository ("Articubot One") in Gazebo, featuring classic path planning implementations.**
 
 This repository serves as a study bench for understanding ROS 2 package structure, URDF/Xacro robot modeling, Gazebo integration, and the implementation of standard path planning algorithms (A*, RRT) in both C++ and Python.
 
@@ -132,6 +132,14 @@ This repository explores the following algorithms located in the `src/` director
     * `dynamic_RRT.cpp`: An experimental variation for dynamic environments (under developing) .
 
 ---
+
+## Acknowledgments
+
+This project is based on the **Articubot One** robot platform created by **Josh Newans**.
+* Original Repository: [joshnewans/articubot_one](https://github.com/joshnewans/articubot_one)
+* Tutorials: [Building a Mobile Robot (YouTube Playlist)](https://www.youtube.com/watch?v=OWeLUSzxMsw&list=PLunhqkrRNRhYAffV8JDiFOatQXuU-NnxT)
+
+Special thanks to Josh for his comprehensive tutorials on ROS 2 and Gazebo simulation.
 
 ## License
 
